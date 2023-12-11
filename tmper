@@ -1,0 +1,29 @@
+#!/bin/bash
+clear
+
+read -p "¿Cuántos segundos?: " contador
+min_temp=100
+max_temp=0
+sum_temp=0
+num_muestras=0
+while [ $contador -gt 0 ]; do
+    temperatura=$(vcgencmd measure_temp | egrep -o '[0-9]*\.[0-9]*')
+    if (( $(echo "$temperatura < $min_temp" | bc -l) )); then
+        min_temp=$temperatura
+    fi
+    if (( $(echo "$temperatura > $max_temp" | bc -l) )); then
+        max_temp=$temperatura
+    fi
+    sum_temp=$(echo "$sum_temp + $temperatura" | bc -l)
+    ((num_muestras++))
+    clear
+    echo "La temperatura actual es $temperatura grados Celsius"
+    echo "Faltan $contador segundos para la siguiente muestra"
+    sleep 1
+    contador=$((contador - 1))
+done
+clear
+average_temp=$(echo "$sum_temp / $num_muestras" | bc -l)
+echo "Temperatura mínima: $min_temp grados Celsius"
+echo "Temperatura máxima: $max_temp grados Celsius"
+echo "Temperatura media: $average_temp grados Celsius"
